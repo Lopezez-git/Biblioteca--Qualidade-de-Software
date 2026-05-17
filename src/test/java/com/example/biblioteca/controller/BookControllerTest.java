@@ -17,6 +17,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.List;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -27,10 +28,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class BookControllerTest extends MongoTestBase {
 
-    @Autowired private MockMvc mockMvc;
-    @Autowired private BookRepository bookRepository;
-    @Autowired private UserRepository userRepository;
-    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private BookRepository bookRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private static final String USUARIO = "mvc_user";
 
@@ -38,8 +46,15 @@ class BookControllerTest extends MongoTestBase {
     void setUp() {
         bookRepository.deleteAll();
         userRepository.deleteAll();
-        User u = new User(USUARIO, "mvc@email.com", passwordEncoder.encode("senha123"));
+
+        User u = new User(
+                USUARIO,
+                "mvc@email.com",
+                passwordEncoder.encode("senha123")
+        );
+
         u.setRoles(List.of("ROLE_USER"));
+
         userRepository.save(u);
     }
 
@@ -47,6 +62,7 @@ class BookControllerTest extends MongoTestBase {
     @Order(1)
     @DisplayName("GET /livros redireciona para login quando não autenticado")
     void deveRedirecionarParaLoginSemAuth() throws Exception {
+
         mockMvc.perform(get("/livros"))
                 .andExpect(status().is3xxRedirection());
     }
@@ -55,7 +71,11 @@ class BookControllerTest extends MongoTestBase {
     @Order(2)
     @DisplayName("GET /livros retorna 200 para usuário autenticado")
     void deveRetornarListaParaUsuarioAutenticado() throws Exception {
-        mockMvc.perform(get("/livros").with(user(USUARIO).roles("USER")))
+
+        mockMvc.perform(
+                        get("/livros")
+                                .with(user(USUARIO).roles("USER"))
+                )
                 .andExpect(status().isOk())
                 .andExpect(view().name("book/list"));
     }
@@ -64,7 +84,11 @@ class BookControllerTest extends MongoTestBase {
     @Order(3)
     @DisplayName("GET /livros/novo retorna formulário")
     void deveRetornarFormularioNovo() throws Exception {
-        mockMvc.perform(get("/livros/novo").with(user(USUARIO).roles("USER")))
+
+        mockMvc.perform(
+                        get("/livros/novo")
+                                .with(user(USUARIO).roles("USER"))
+                )
                 .andExpect(status().isOk())
                 .andExpect(view().name("book/form"))
                 .andExpect(model().attributeExists("livro"));
@@ -74,12 +98,16 @@ class BookControllerTest extends MongoTestBase {
     @Order(4)
     @DisplayName("POST /livros/salvar salva e redireciona")
     void deveSalvarLivroERedirecionar() throws Exception {
-        mockMvc.perform(post("/livros/salvar")
-                        .with(user(USUARIO).roles("USER"))
-                        .param("titulo", "Memórias Póstumas")
-                        .param("autor", "Machado de Assis")
-                        .param("anoPublicacao", "1881")
-                        .param("status", "NAO_LIDO"))
+
+        mockMvc.perform(
+                        post("/livros/salvar")
+                                .with(user(USUARIO).roles("USER"))
+                                .with(csrf())
+                                .param("titulo", "Memórias Póstumas")
+                                .param("autor", "Machado de Assis")
+                                .param("anoPublicacao", "1881")
+                                .param("status", "NAO_LIDO")
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/livros"));
     }
@@ -88,9 +116,15 @@ class BookControllerTest extends MongoTestBase {
     @Order(5)
     @DisplayName("GET /livros/editar/{id} retorna formulário de edição")
     void deveRetornarFormularioEdicao() throws Exception {
-        Book livro = bookRepository.save(new Book("Livro Edit", "Autor", 2020, USUARIO));
 
-        mockMvc.perform(get("/livros/editar/" + livro.getId()).with(user(USUARIO).roles("USER")))
+        Book livro = bookRepository.save(
+                new Book("Livro Edit", "Autor", 2020, USUARIO)
+        );
+
+        mockMvc.perform(
+                        get("/livros/editar/" + livro.getId())
+                                .with(user(USUARIO).roles("USER"))
+                )
                 .andExpect(status().isOk())
                 .andExpect(view().name("book/form"));
     }
@@ -99,9 +133,15 @@ class BookControllerTest extends MongoTestBase {
     @Order(6)
     @DisplayName("GET /livros/editar/{id} redireciona se livro não for do usuário")
     void deveRedirecionarSeNaoForDono() throws Exception {
-        Book livro = bookRepository.save(new Book("Livro Alheio", "Autor", 2020, "outro"));
 
-        mockMvc.perform(get("/livros/editar/" + livro.getId()).with(user(USUARIO).roles("USER")))
+        Book livro = bookRepository.save(
+                new Book("Livro Alheio", "Autor", 2020, "outro")
+        );
+
+        mockMvc.perform(
+                        get("/livros/editar/" + livro.getId())
+                                .with(user(USUARIO).roles("USER"))
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/livros"));
     }
@@ -110,10 +150,16 @@ class BookControllerTest extends MongoTestBase {
     @Order(7)
     @DisplayName("POST /livros/deletar/{id} remove e redireciona")
     void deveDeletarERedirecionar() throws Exception {
-        Book livro = bookRepository.save(new Book("Para Remover", "Autor", 2020, USUARIO));
 
-        mockMvc.perform(post("/livros/deletar/" + livro.getId())
-                        .with(user(USUARIO).roles("USER")))
+        Book livro = bookRepository.save(
+                new Book("Para Remover", "Autor", 2020, USUARIO)
+        );
+
+        mockMvc.perform(
+                        post("/livros/deletar/" + livro.getId())
+                                .with(user(USUARIO).roles("USER"))
+                                .with(csrf())
+                )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/livros"));
     }
@@ -122,9 +168,12 @@ class BookControllerTest extends MongoTestBase {
     @Order(8)
     @DisplayName("GET /livros com filtro de status retorna view correta")
     void deveFiltrarPorStatus() throws Exception {
-        mockMvc.perform(get("/livros")
-                        .with(user(USUARIO).roles("USER"))
-                        .param("status", "LIDO"))
+
+        mockMvc.perform(
+                        get("/livros")
+                                .with(user(USUARIO).roles("USER"))
+                                .param("status", "LIDO")
+                )
                 .andExpect(status().isOk())
                 .andExpect(view().name("book/list"));
     }
@@ -133,9 +182,12 @@ class BookControllerTest extends MongoTestBase {
     @Order(9)
     @DisplayName("GET /livros com busca retorna view correta")
     void deveBuscarPorTitulo() throws Exception {
-        mockMvc.perform(get("/livros")
-                        .with(user(USUARIO).roles("USER"))
-                        .param("busca", "machado"))
+
+        mockMvc.perform(
+                        get("/livros")
+                                .with(user(USUARIO).roles("USER"))
+                                .param("busca", "machado")
+                )
                 .andExpect(status().isOk())
                 .andExpect(view().name("book/list"));
     }
