@@ -6,9 +6,6 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-/**
- * Classe base para testes com MongoDB + Testcontainers
- */
 @Testcontainers
 public abstract class MongoTestBase {
 
@@ -22,7 +19,6 @@ public abstract class MongoTestBase {
 
     @DynamicPropertySource
     static void mongoProperties(DynamicPropertyRegistry registry) {
-
         registry.add(
                 "spring.data.mongodb.uri",
                 mongoDBContainer::getReplicaSetUrl
