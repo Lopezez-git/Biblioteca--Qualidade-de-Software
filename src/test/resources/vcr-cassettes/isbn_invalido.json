@@ -1,0 +1,20 @@
+{
+  "http_interactions": [
+    {
+      "request": {
+        "method": "GET",
+        "uri": "https://openlibrary.org/api/books?bibkeys=ISBN:0000000000&format=json&jscmd=data"
+      },
+      "response": {
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "{}"
+      }
+    }
+  ]
+}

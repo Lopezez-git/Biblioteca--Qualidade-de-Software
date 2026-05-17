@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${titulo ?: 'Minha Biblioteca'}">Minha Biblioteca</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand">
+        <a th:href="@{/livros}">📚 Minha Biblioteca</a>
+    </div>
+    <div class="nav-links" sec:authorize="isAuthenticated()">
+        <a th:href="@{/livros}">Meus Livros</a>
+        <a th:href="@{/livros/novo}" class="btn-primary">+ Novo Livro</a>
+        <span class="nav-user">Olá, <strong sec:authentication="name"></strong></span>
+        <form th:action="@{/auth/logout}" method="post" style="display:inline">
+            <button type="submit" class="btn-logout">Sair</button>
+        </form>
+    </div>
+    <div class="nav-links" sec:authorize="!isAuthenticated()">
+        <a th:href="@{/auth/login}">Login</a>
+        <a th:href="@{/auth/cadastro}" class="btn-primary">Cadastrar</a>
+    </div>
+</nav>
+
+<main class="container">
+    <div th:if="${sucesso}" class="alert alert-success" th:text="${sucesso}"></div>
+    <div th:if="${erro}" class="alert alert-error" th:text="${erro}"></div>
+
+    <th:block th:replace="${content}"></th:block>
+</main>
+
+<footer>
+    <p>Gerenciador de Biblioteca Pessoal &mdash; ADS Projeto Semestral</p>
+</footer>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

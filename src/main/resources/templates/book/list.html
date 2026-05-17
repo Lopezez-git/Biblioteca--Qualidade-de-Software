@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout :: layout(~{::content})}">
+<body>
+<th:block th:fragment="content">
+    <div class="page-header">
+        <h1>📚 Minha Biblioteca</h1>
+        <a th:href="@{/livros/novo}" class="btn-primary">+ Adicionar Livro</a>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="stats-grid" th:if="${estatisticas}">
+        <div class="stat-card">
+            <span class="stat-number" th:text="${estatisticas.total()}">0</span>
+            <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-card lido">
+            <span class="stat-number" th:text="${estatisticas.lidos()}">0</span>
+            <span class="stat-label">Lidos</span>
+        </div>
+        <div class="stat-card lendo">
+            <span class="stat-number" th:text="${estatisticas.lendo()}">0</span>
+            <span class="stat-label">Lendo</span>
+        </div>
+        <div class="stat-card nao-lido">
+            <span class="stat-number" th:text="${estatisticas.naoLidos()}">0</span>
+            <span class="stat-label">Não Lidos</span>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters">
+        <form th:action="@{/livros}" method="get" class="filter-form">
+            <input type="text" name="busca" placeholder="Buscar por título..." th:value="${busca}"/>
+            <select name="status">
+                <option value="">Todos os status</option>
+                <option th:each="s : ${statusOptions}"
+                        th:value="${s.name()}"
+                        th:text="${s.name()}"
+                        th:selected="${s.name() == statusSelecionado}"></option>
+            </select>
+            <button type="submit" class="btn-secondary">Filtrar</button>
+            <a th:href="@{/livros}" class="btn-link">Limpar</a>
+        </form>
+    </div>
+
+    <!-- Lista de livros -->
+    <div th:if="${#lists.isEmpty(livros)}" class="empty-state">
+        <p>Nenhum livro encontrado. <a th:href="@{/livros/novo}">Adicione o primeiro!</a></p>
+    </div>
+
+    <div class="book-grid" th:unless="${#lists.isEmpty(livros)}">
+        <div th:each="livro : ${livros}" class="book-card">
+            <div class="book-info">
+                <h3 th:text="${livro.titulo}">Título</h3>
+                <p class="autor" th:text="${livro.autor}">Autor</p>
+                <p class="ano" th:text="${livro.anoPublicacao}">Ano</p>
+                <span class="status-badge" th:classappend="${'status-' + livro.status.name().toLowerCase()}"
+                      th:text="${livro.status.name()}">Status</span>
+                <div th:if="${livro.avaliacaoNota}" class="avaliacao">
+                    <span th:each="i : ${#numbers.sequence(1, livro.avaliacaoNota)}">⭐</span>
+                </div>
+            </div>
+            <div class="book-actions">
+                <a th:href="@{/livros/editar/{id}(id=${livro.id})}" class="btn-secondary">Editar</a>
+                <form th:action="@{/livros/deletar/{id}(id=${livro.id})}" method="post"
+                      onsubmit="return confirm('Remover este livro?')">
+                    <button type="submit" class="btn-danger">Remover</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</th:block>
+</body>
+</html>

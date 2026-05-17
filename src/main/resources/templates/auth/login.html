@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Login - Minha Biblioteca</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body class="auth-page">
+<div class="auth-container">
+    <div class="auth-card">
+        <h1>📚 Minha Biblioteca</h1>
+        <h2>Entrar na sua conta</h2>
+
+        <div th:if="${param.error}" class="alert alert-error">
+            Usuário ou senha inválidos.
+        </div>
+        <div th:if="${param.logout}" class="alert alert-success">
+            Você saiu com sucesso.
+        </div>
+        <div th:if="${sucesso}" class="alert alert-success" th:text="${sucesso}"></div>
+
+        <form th:action="@{/auth/login}" method="post">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required autofocus
+                       placeholder="Seu username"/>
+            </div>
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" name="password" required
+                       placeholder="Sua senha"/>
+            </div>
+            <button type="submit" class="btn-primary btn-full">Entrar</button>
+        </form>
+
+        <p class="auth-link">Não tem conta? <a th:href="@{/auth/cadastro}">Cadastre-se</a></p>
+    </div>
+</div>
+</body>
+</html>

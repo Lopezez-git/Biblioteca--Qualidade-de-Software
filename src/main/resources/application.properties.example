@@ -1,0 +1,9 @@
+spring.application.name=Gerenciador de Biblioteca Pessoal
+
+# MongoDB Configuration - substitua pela sua URI
+# Atlas: mongodb+srv://<user>:<password>@cluster0.xxx.mongodb.net/biblioteca?retryWrites=true&w=majority
+# Local: mongodb://localhost:27017/biblioteca
+spring.data.mongodb.uri=SUA_URI_AQUI
+
+server.port=8080
+spring.thymeleaf.cache=false
