@@ -10,7 +10,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 public abstract class MongoTestBase {
 
     @Container
-    static MongoDBContainer mongoDBContainer =
+    static final MongoDBContainer mongoDBContainer =
             new MongoDBContainer("mongo:7");
 
     @DynamicPropertySource
