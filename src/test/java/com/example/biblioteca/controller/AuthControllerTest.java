@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -140,4 +141,18 @@ class AuthControllerTest extends MongoTestBase {
                         .content(objectMapper.writeValueAsString(user2)))
                 .andExpect(status().isConflict());
     }
+
+    @Test
+    @DisplayName("Deve rejeitar cadastro sem username")
+    void deveRejeitarCadastroSemUsername() throws Exception {
+
+        mockMvc.perform(post("/auth/cadastro")
+                        .with(csrf())
+                        .param("username", "")
+                        .param("email", "allan@email.com")
+                        .param("password", "123456"))
+                .andExpect(status().isBadRequest());
+    }
+
+    
 }

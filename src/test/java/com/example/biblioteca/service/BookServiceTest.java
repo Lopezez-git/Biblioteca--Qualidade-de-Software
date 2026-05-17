@@ -193,4 +193,50 @@ class BookServiceTest extends MongoTestBase {
         Optional<Book> resultado = bookService.buscarPorId(livro.getId(), "user2");
         assertFalse(resultado.isPresent());
     }
+
+    @Test
+    @Order(15)
+    @DisplayName("Filtrar por status sem resultados deve retornar lista vazia")
+    void filtrarPorStatusSemResultados() {
+
+        List<Book> resultado =
+                bookService.filtrarPorStatus("user1", Book.StatusLeitura.LIDO);
+
+        assertTrue(resultado.isEmpty());
+    }
+
+    @Test
+    @Order(16)
+    @DisplayName("Buscar título inexistente deve retornar lista vazia")
+    void buscarTituloInexistente() {
+
+        bookService.salvar(new Book("Duna", "Herbert", 1965, "user1"));
+
+        List<Book> resultado =
+                bookService.buscarPorTitulo("user1", "Harry Potter");
+
+        assertTrue(resultado.isEmpty());
+    }
+
+    @Test
+    @Order(17)
+    @DisplayName("Estatísticas sem livros devem retornar zero")
+    void estatisticasSemLivros() {
+
+        var stats = bookService.calcularEstatisticas("user1");
+
+        assertEquals(0, stats.total());
+        assertEquals(0, stats.lidos());
+        assertEquals(0, stats.lendo());
+        assertEquals(0, stats.naoLidos());
+    }
+
+    @Test
+    @Order(18)
+    @DisplayName("Deletar ID inexistente não deve lançar erro")
+    void deletarIdInexistente() {
+
+        assertDoesNotThrow(() ->
+                bookService.deletar("id-inexistente"));
+    }
 }
