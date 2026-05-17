@@ -10,14 +10,18 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 public abstract class MongoTestBase {
 
     @Container
-    static final MongoDBContainer mongoDBContainer =
-            new MongoDBContainer("mongo:7");
+    static final MongoDBContainer mongo =
+            new MongoDBContainer("mongo:7.0");
+
+    static {
+        mongo.start();
+    }
 
     @DynamicPropertySource
-    static void mongoProperties(DynamicPropertyRegistry registry) {
+    static void configureMongo(DynamicPropertyRegistry registry) {
         registry.add(
                 "spring.data.mongodb.uri",
-                mongoDBContainer::getReplicaSetUrl
+                mongo::getReplicaSetUrl
         );
     }
 }

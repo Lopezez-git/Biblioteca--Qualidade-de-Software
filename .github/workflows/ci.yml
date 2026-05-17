@@ -15,6 +15,7 @@ permissions:
   contents: read
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
 
@@ -25,22 +26,28 @@ jobs:
       - name: Configurar Java 21
         uses: actions/setup-java@v4
         with:
-          java-version: "21"
-          distribution: "temurin"
+          distribution: temurin
+          java-version: 21
           cache: maven
 
-      - name: Permitir execução do Maven Wrapper
+      - name: Permitir Maven Wrapper
         run: chmod +x mvnw
 
-      - name: Build do projeto
-        run: ./mvnw -B -ntp clean package -DskipTests
+      - name: Build
+        run: ./mvnw clean package -DskipTests
 
   test:
     runs-on: ubuntu-latest
     needs: build
 
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+
     env:
-      TESTCONTAINERS_RYUK_DISABLED: true
+      SPRING_DATA_MONGODB_URI: mongodb://localhost:27017/test
 
     steps:
       - name: Checkout do código
@@ -49,17 +56,17 @@ jobs:
       - name: Configurar Java 21
         uses: actions/setup-java@v4
         with:
-          java-version: "21"
-          distribution: "temurin"
+          distribution: temurin
+          java-version: 21
           cache: maven
 
-      - name: Permitir execução do Maven Wrapper
+      - name: Permitir Maven Wrapper
         run: chmod +x mvnw
 
-      - name: Executar testes
-        run: ./mvnw -B -ntp clean test
+      - name: Rodar testes
+        run: ./mvnw clean test
 
-      - name: Upload dos relatórios de teste
+      - name: Upload relatórios Surefire
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -70,6 +77,15 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
 
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+
+    env:
+      SPRING_DATA_MONGODB_URI: mongodb://localhost:27017/test
+
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
@@ -77,36 +93,35 @@ jobs:
       - name: Configurar Java 21
         uses: actions/setup-java@v4
         with:
-          java-version: "21"
-          distribution: "temurin"
+          distribution: temurin
+          java-version: 21
           cache: maven
 
-      - name: Permitir execução do Maven Wrapper
+      - name: Permitir Maven Wrapper
         run: chmod +x mvnw
 
       - name: Gerar cobertura JaCoCo
-        env:
-          TESTCONTAINERS_RYUK_DISABLED: true
-        run: ./mvnw -B -ntp clean verify
+        run: ./mvnw clean verify
 
       - name: Upload relatório JaCoCo
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-report
           path: target/site/jacoco/
 
-      - name: Upload do JAR
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-jar
-          path: target/*.jar
-
   sonarqube:
     runs-on: ubuntu-latest
     needs: coverage
     if: github.ref == 'refs/heads/main'
+
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+
+    env:
+      SPRING_DATA_MONGODB_URI: mongodb://localhost:27017/test
 
     steps:
       - name: Checkout do código
@@ -117,25 +132,22 @@ jobs:
       - name: Configurar Java 21
         uses: actions/setup-java@v4
         with:
-          java-version: "21"
-          distribution: "temurin"
+          distribution: temurin
+          java-version: 21
           cache: maven
 
-      - name: Permitir execução do Maven Wrapper
+      - name: Permitir Maven Wrapper
         run: chmod +x mvnw
 
-      - name: Gerar cobertura para SonarCloud
-        env:
-          TESTCONTAINERS_RYUK_DISABLED: true
-        run: ./mvnw -B -ntp clean verify
+      - name: Rodar verify
+        run: ./mvnw clean verify
 
-      - name: Análise SonarCloud
+      - name: SonarCloud
         run: |
-          ./mvnw -B -ntp sonar:sonar \
-          -Dsonar.projectKey=Lopezez-git_Biblioteca--Qualidade-de-Software \
-          -Dsonar.organization=lopezez-git \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
-          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+          ./mvnw sonar:sonar \
+            -Dsonar.projectKey=Lopezez-git_Biblioteca--Qualidade-de-Software \
+            -Dsonar.organization=lopezez-git \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
