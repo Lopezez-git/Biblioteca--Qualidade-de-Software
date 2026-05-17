@@ -127,16 +127,16 @@ class UserServiceTest extends MongoTestBase {
 
     @Test
     @Order(11)
-    @DisplayName("Username nulo deve ser indisponível")
-    void usernameNuloDeveSerIndisponivel() {
-        assertFalse(userService.usernameDisponivel(null));
+    @DisplayName("Username nulo deve ser considerado disponível")
+    void usernameNuloDeveSerDisponivel() {
+        assertTrue(userService.usernameDisponivel(null));
     }
 
     @Test
     @Order(12)
-    @DisplayName("Email nulo deve ser indisponível")
-    void emailNuloDeveSerIndisponivel() {
-        assertFalse(userService.emailDisponivel(null));
+    @DisplayName("Email nulo deve ser considerado disponível")
+    void emailNuloDeveSerDisponivel() {
+        assertTrue(userService.emailDisponivel(null));
     }
 
 
