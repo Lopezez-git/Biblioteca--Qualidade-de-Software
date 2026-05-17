@@ -124,4 +124,20 @@ class UserServiceTest extends MongoTestBase {
         assertTrue(userService.buscarPorEmail("carlos@email.com").isPresent());
         assertFalse(userService.buscarPorEmail("nao@existe.com").isPresent());
     }
+
+    @Test
+    @Order(11)
+    @DisplayName("Username nulo deve ser indisponível")
+    void usernameNuloDeveSerIndisponivel() {
+        assertFalse(userService.usernameDisponivel(null));
+    }
+
+    @Test
+    @Order(12)
+    @DisplayName("Email nulo deve ser indisponível")
+    void emailNuloDeveSerIndisponivel() {
+        assertFalse(userService.emailDisponivel(null));
+    }
+
+
 }
