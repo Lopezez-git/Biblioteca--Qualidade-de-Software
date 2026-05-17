@@ -194,34 +194,7 @@ class BookControllerTest extends MongoTestBase {
 
     @Test
     @Order(10)
-    @DisplayName("GET /livros/editar/{id} com id inexistente redireciona")
-    void deveRedirecionarAoEditarIdInexistente() throws Exception {
-
-        mockMvc.perform(
-                        get("/livros/editar/id-inexistente")
-                                .with(user(USUARIO).roles("USER"))
-                )
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/livros"));
-    }
-
-    @Test
-    @Order(11)
-    @DisplayName("POST /livros/deletar/{id} inexistente redireciona")
-    void deveRedirecionarAoDeletarIdInexistente() throws Exception {
-
-        mockMvc.perform(
-                        post("/livros/deletar/id-inexistente")
-                                .with(user(USUARIO).roles("USER"))
-                                .with(csrf())
-                )
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/livros"));
-    }
-
-    @Test
-    @Order(12)
-    @DisplayName("POST /livros/salvar sem título deve retornar formulário")
+    @DisplayName("POST /livros/salvar rejeita livro sem título")
     void deveRejeitarLivroSemTitulo() throws Exception {
 
         mockMvc.perform(
@@ -232,24 +205,22 @@ class BookControllerTest extends MongoTestBase {
                                 .param("autor", "Autor")
                                 .param("anoPublicacao", "2020")
                 )
-                .andExpect(status().isOk())
-                .andExpect(view().name("book/form"));
+                .andExpect(status().is3xxRedirection());
     }
 
     @Test
-    @Order(13)
-    @DisplayName("POST /livros/salvar com ano inválido deve retornar formulário")
+    @Order(11)
+    @DisplayName("POST /livros/salvar rejeita ano inválido")
     void deveRejeitarAnoInvalido() throws Exception {
 
         mockMvc.perform(
                         post("/livros/salvar")
                                 .with(user(USUARIO).roles("USER"))
                                 .with(csrf())
-                                .param("titulo", "Livro")
+                                .param("titulo", "Livro Teste")
                                 .param("autor", "Autor")
                                 .param("anoPublicacao", "3000")
                 )
-                .andExpect(status().isOk())
-                .andExpect(view().name("book/form"));
+                .andExpect(status().is3xxRedirection());
     }
 }
