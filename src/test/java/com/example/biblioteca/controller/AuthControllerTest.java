@@ -99,4 +99,45 @@ class AuthControllerTest extends MongoTestBase {
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void deveRejeitarSenhaFraca() throws Exception {
+
+        User user = new User(
+                "allan",
+                "allan@email.com",
+                "123"
+        );
+
+        mockMvc.perform(post("/api/usuarios/cadastrar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deveRejeitarEmailDuplicado() throws Exception {
+
+        User user1 = new User(
+                "allan",
+                "allan@email.com",
+                "123456"
+        );
+
+        User user2 = new User(
+                "outro",
+                "allan@email.com",
+                "123456"
+        );
+
+        mockMvc.perform(post("/api/usuarios/cadastrar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user1)))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/usuarios/cadastrar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user2)))
+                .andExpect(status().isConflict());
+    }
 }
