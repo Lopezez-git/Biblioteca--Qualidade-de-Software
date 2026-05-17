@@ -191,4 +191,65 @@ class BookControllerTest extends MongoTestBase {
                 .andExpect(status().isOk())
                 .andExpect(view().name("book/list"));
     }
+
+    @Test
+    @Order(10)
+    @DisplayName("GET /livros/editar/{id} com id inexistente redireciona")
+    void deveRedirecionarAoEditarIdInexistente() throws Exception {
+
+        mockMvc.perform(
+                        get("/livros/editar/id-inexistente")
+                                .with(user(USUARIO).roles("USER"))
+                )
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/livros"));
+    }
+
+    @Test
+    @Order(11)
+    @DisplayName("POST /livros/deletar/{id} inexistente redireciona")
+    void deveRedirecionarAoDeletarIdInexistente() throws Exception {
+
+        mockMvc.perform(
+                        post("/livros/deletar/id-inexistente")
+                                .with(user(USUARIO).roles("USER"))
+                                .with(csrf())
+                )
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/livros"));
+    }
+
+    @Test
+    @Order(12)
+    @DisplayName("POST /livros/salvar sem título deve retornar formulário")
+    void deveRejeitarLivroSemTitulo() throws Exception {
+
+        mockMvc.perform(
+                        post("/livros/salvar")
+                                .with(user(USUARIO).roles("USER"))
+                                .with(csrf())
+                                .param("titulo", "")
+                                .param("autor", "Autor")
+                                .param("anoPublicacao", "2020")
+                )
+                .andExpect(status().isOk())
+                .andExpect(view().name("book/form"));
+    }
+
+    @Test
+    @Order(13)
+    @DisplayName("POST /livros/salvar com ano inválido deve retornar formulário")
+    void deveRejeitarAnoInvalido() throws Exception {
+
+        mockMvc.perform(
+                        post("/livros/salvar")
+                                .with(user(USUARIO).roles("USER"))
+                                .with(csrf())
+                                .param("titulo", "Livro")
+                                .param("autor", "Autor")
+                                .param("anoPublicacao", "3000")
+                )
+                .andExpect(status().isOk())
+                .andExpect(view().name("book/form"));
+    }
 }
