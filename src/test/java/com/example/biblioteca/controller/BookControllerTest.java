@@ -16,6 +16,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -76,6 +77,7 @@ class BookControllerTest extends MongoTestBase {
     void deveSalvarLivroERedirecionar() throws Exception {
         mockMvc.perform(post("/livros/salvar")
                         .with(user(USUARIO).roles("USER"))
+                        .with(csrf())
                         .param("titulo", "Memórias Póstumas")
                         .param("autor", "Machado de Assis")
                         .param("anoPublicacao", "1881")
@@ -113,7 +115,8 @@ class BookControllerTest extends MongoTestBase {
         Book livro = bookRepository.save(new Book("Para Remover", "Autor", 2020, USUARIO));
 
         mockMvc.perform(post("/livros/deletar/" + livro.getId())
-                        .with(user(USUARIO).roles("USER")))
+                        .with(user(USUARIO).roles("USER"))
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/livros"));
     }
