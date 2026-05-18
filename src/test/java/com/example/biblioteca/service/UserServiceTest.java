@@ -139,5 +139,4 @@ class UserServiceTest extends MongoTestBase {
         assertTrue(userService.emailDisponivel(null));
     }
 
-
 }
