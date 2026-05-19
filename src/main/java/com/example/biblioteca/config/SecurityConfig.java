@@ -26,22 +26,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/auth/**", "/css/**", "/js/**", "/api/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
-                .loginPage("/auth/login")
-                .defaultSuccessUrl("/livros", true)
-                .failureUrl("/auth/login?error=true")
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/auth/logout")
-                .logoutSuccessUrl("/auth/login?logout=true")
-                .permitAll()
-            )
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/auth/**", "/css/**", "/js/**", "/images/**", "/api/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/auth/login")
+                        .defaultSuccessUrl("/livros", true)
+                        .failureUrl("/auth/login?error=true")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/auth/logout")
+                        .logoutSuccessUrl("/auth/login?logout=true")
+                        .permitAll()
+                )
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
 
         return http.build();
     }
@@ -50,16 +50,16 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         return username -> {
             User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + username));
+                    .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + username));
 
             return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                user.isAtivo(),
-                true, true, true,
-                user.getRoles().stream()
-                    .map(SimpleGrantedAuthority::new)
-                    .collect(Collectors.toList())
+                    user.getUsername(),
+                    user.getPassword(),
+                    user.isAtivo(),
+                    true, true, true,
+                    user.getRoles().stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toList())
             );
         };
     }

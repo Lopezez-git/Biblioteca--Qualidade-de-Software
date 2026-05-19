@@ -2,6 +2,7 @@ package com.example.biblioteca.service;
 
 import com.example.biblioteca.entity.Book;
 import com.example.biblioteca.repository.BookRepository;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,10 @@ public class BookService {
     }
 
     public Book salvar(Book book) {
+        if (book.getId() == null || book.getId().isBlank()) {
+            book.setId(java.util.UUID.randomUUID().toString());
+            book.setCriadoEm(LocalDateTime.now());
+        }
         book.setAtualizadoEm(LocalDateTime.now());
         return bookRepository.save(book);
     }
@@ -50,7 +55,7 @@ public class BookService {
     }
 
     public boolean isIsbnValido(String isbn) {
-        if (isbn == null || isbn.isBlank()) return true; // ISBN é opcional
+        if (isbn == null || isbn.isBlank()) return true;
         String limpo = isbn.replaceAll("[^0-9X]", "");
         return limpo.length() == 10 || limpo.length() == 13;
     }
